@@ -42,7 +42,7 @@ class Post extends Model
                         return $this->image_path;
                     }
 
-                    return Storage::disk('s3')->url($this->image_path);
+                    return Storage::url($this->image_path);
 
                     /* return route('posts.image', $this); */
 
@@ -73,6 +73,10 @@ class Post extends Model
     //Relacion uno a muchos polimorfica
     public function comments(){
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function images(){
+        return $this->morphMany(Image::class, 'imageable');
     }
 
     //Relacion muchos a muchos polimorfica

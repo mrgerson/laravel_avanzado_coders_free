@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Image;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -80,6 +81,30 @@ class PostController extends Controller
             'image' => 'nullable|image'
         ]);
 
+        $old_images = $post->images->pluck('path')->toArray();
+
+        $re_extractImages = '/src=["\']([^ ^"^\']*)["\']/ims';
+        preg_match_all($re_extractImages, $request->body, $matches);
+        $images = $matches[1];
+
+        foreach ($images as $key => $image) {
+            $images[$key] = 'images/' . pathinfo($image, PATHINFO_BASENAME);
+        }
+
+        $new_images = array_diff($images, $old_images);
+        $deleted_images = array_diff($old_images, $images);
+
+        foreach ($new_images as $image) {
+            $post->images()->create([
+                'path' => $image,
+            ]);
+        }
+
+        foreach ($deleted_images as $image) {
+            Storage::delete($image);
+            Image::where('path', $image)->delete();
+        }
+
         $data = $request->all();
 
         $tags = [];
@@ -106,7 +131,6 @@ class PostController extends Controller
             /* $data['image_path'] = Storage::disk('s3')->putFileAs('posts', $request->image, $file_name, 'public'); */
 
             $data['image_path'] = $request->file('image')->storeAs('posts', $file_name, [
-                'disk' => 's3',
                 'visibility' => 'public',
             ]);
         }
