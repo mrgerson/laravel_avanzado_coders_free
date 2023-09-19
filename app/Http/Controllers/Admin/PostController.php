@@ -9,6 +9,7 @@ use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image as ImageIntervention;
 
 class PostController extends Controller
 {
@@ -127,12 +128,19 @@ class PostController extends Controller
             }
 
             $file_name = $request->slug . '.' . $request->file('image')->getClientOriginalExtension();
-            
-            /* $data['image_path'] = Storage::disk('s3')->putFileAs('posts', $request->image, $file_name, 'public'); */
+            $data['image_path'] = Storage::putFileAs('posts', $request->image, $file_name, 'public');
 
-            $data['image_path'] = $request->file('image')->storeAs('posts', $file_name, [
+            //storage/posts/imagen.jpg
+
+            $img = ImageIntervention::make('storage/' . $data['image_path']);
+            $img->resize(1200, null, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+            $img->save();
+
+            /* $data['image_path'] = $request->file('image')->storeAs('posts', $file_name, [
                 'visibility' => 'public',
-            ]);
+            ]); */
         }
 
         $post->update($data);
