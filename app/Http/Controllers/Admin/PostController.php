@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ResizeImage;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image as ImageIntervention;
+
 
 class PostController extends Controller
 {
@@ -18,7 +20,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::latest('id')
+        $posts = Post::where('user_id', auth()->id())
+            ->latest('id')
             ->paginate(10);
 
         return view('admin.posts.index', compact('posts'));
@@ -60,6 +63,13 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+
+        if (!Gate::allows('author', $post)) {
+            abort(403, 'No tienes permisos para editar este post');
+        }
+
+        /* $this->authorize('author', $post); */
+
         $categories = Category::all();
 
         return view('admin.posts.edit', compact('post', 'categories'));
@@ -70,7 +80,6 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-
         $request->validate([
             'title' => 'required',
             'slug' => 'required|unique:posts,slug,' . $post->id,
@@ -131,12 +140,8 @@ class PostController extends Controller
             $data['image_path'] = Storage::putFileAs('posts', $request->image, $file_name, 'public');
 
             //storage/posts/imagen.jpg
-
-            $img = ImageIntervention::make('storage/' . $data['image_path']);
-            $img->resize(1200, null, function ($constraint) {
-                $constraint->aspectRatio();
-            });
-            $img->save();
+            ResizeImage::dispatch($data['image_path']);
+            
 
             /* $data['image_path'] = $request->file('image')->storeAs('posts', $file_name, [
                 'visibility' => 'public',
