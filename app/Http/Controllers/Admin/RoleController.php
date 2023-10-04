@@ -34,10 +34,11 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => ['required', 'unique:roles,name'],
-            'permissions' => ['required', 'array']
+            'permissions' => 'nullable|array',
         ]);
 
         $role = Role::create($request->all());
+
         $role->permissions()->attach($request->permissions);
 
         session()->flash('swal', [
@@ -63,11 +64,10 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
 
-        /* $permissions = $role->permissions->pluck('id');
-        dd(in_array(2, $permissions->toArray())); */
+        /* $permissions = $role->permissions->pluck('id')->toArray();
+        dd(in_array(3, $permissions)); */
 
         $permissions = Permission::all();
-
         return view('admin.roles.edit', compact('role', 'permissions'));
     }
 
@@ -76,13 +76,13 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-
         $request->validate([
             'name' => ['required', 'unique:roles,name,' . $role->id],
-            'permissions' => ['required', 'array']
+            'permissions' => 'nullable|array',
         ]);
 
         $role->update($request->all());
+
         $role->permissions()->sync($request->permissions);
 
         session()->flash('swal', [

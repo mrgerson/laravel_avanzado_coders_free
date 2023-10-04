@@ -21,21 +21,24 @@
             </div>
 
             <div class="mb-4">
+
                 <ul>
                     @foreach ($permissions as $permission)
+                        
                         <li>
-
                             <label>
-                                <x-checkbox 
-                                    name="permissions[]" 
+                                <x-checkbox
+                                    name="permissions[]"
                                     value="{{$permission->id}}"
-                                    :checked="in_array($permission->id, is_array(old('permissions', $role->permissions->pluck('id')->toArray())) ? old('permissions', $role->permissions->pluck('id')->toArray()) : [])" />
-                                {{ $permission->name }}
+                                    :checked="in_array($permission->id, old('permissions', $role->permissions->pluck('id')->toArray()))"
+                                    />
+                                {{$permission->name}}
                             </label>
+                        </li>
 
-                        </li>   
                     @endforeach
                 </ul>
+
             </div>
 
             <div class="flex">
