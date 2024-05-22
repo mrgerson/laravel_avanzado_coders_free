@@ -19,7 +19,7 @@
             </thead>
             <tbody>
                 @foreach ($users as $user)
-                
+
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             {{ $user->id }}
@@ -38,10 +38,9 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
-
-    <div class="mt-4">
-        {{ $users->links() }}
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $users->links() }}
+        </div>
     </div>
 
 </x-admin-layout>

@@ -24,7 +24,7 @@
 
                 <ul>
                     @foreach ($permissions as $permission)
-                        
+
                         <li>
                             <label>
                                 <x-checkbox
